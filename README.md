@@ -5,7 +5,7 @@ Open shelf for small, reusable **UI motion demos** (web + Swift when useful).
 Not a design system. A place to keep motions we like, share them, and reuse later.
 
 **Repo:** [github.com/zacfire/motion-lab](https://github.com/zacfire/motion-lab)  
-**Live:** *(filled after Vercel deploy)*
+**Live:** [motion-lab-eight.vercel.app](https://motion-lab-eight.vercel.app) · [demo](https://motion-lab-eight.vercel.app/demos/akureyri-ripple-heart/)
 
 ## Demos
 
