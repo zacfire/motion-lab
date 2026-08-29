@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ripple Dot Heart — Thinking (Akureyri Red)</title>
+  <meta name="description" content="Open-source ripple heart lattice — Akureyri signature red. Inspired by Rocorgi / lovethinking." />
+  <style>
+    :root {
+      --red: #FF3366;
+      --page: #1a1520;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 40px 24px;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 40%, #3a2040 0%, transparent 55%),
+        linear-gradient(160deg, #1a1520 0%, #0d0a12 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Text", sans-serif;
+      color: #e8e4ec;
+    }
+    .stage {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: stretch;
+    }
+    .card {
+      width: min(340px, 86vw);
+      aspect-ratio: 1;
+      border-radius: 28px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 24px 48px rgba(0,0,0,0.35);
+    }
+    .card.light {
+      background: linear-gradient(165deg, #f4f4f5 0%, #e4e4e7 100%);
+      color: #71717a;
+    }
+    .card.dark {
+      background: linear-gradient(165deg, #27272a 0%, #18181b 100%);
+      color: #a1a1aa;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .corner {
+      position: absolute;
+      top: 18px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      user-select: none;
+    }
+    .corner.left { left: 20px; }
+    .corner.right { right: 20px; }
+    .center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .center canvas {
+      display: block;
+      /* soft pixel look closer to original */
+      image-rendering: auto;
+    }
+    .label {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: inherit;
+    }
+    .card.light .label { color: #a1a1aa; }
+    .card.dark .label { color: #71717a; }
+    footer {
+      text-align: center;
+      max-width: 520px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(232,228,236,0.55);
+    }
+    footer a { color: #ff6b8a; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    code {
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage" data-export-root>
+    <div class="card light" data-theme="light">
+      <span class="corner left">Light</span>
+      <span class="corner right">Mode</span>
+      <div class="center">
+        <canvas data-heart width="20" height="17" aria-hidden="true"></canvas>
+        <span class="label">Thinking</span>
+      </div>
+    </div>
+    <div class="card dark" data-theme="dark">
+      <span class="corner left">Dark</span>
+      <span class="corner right">Mode</span>
+      <div class="center">
+        <canvas data-heart width="20" height="17" aria-hidden="true"></canvas>
+        <span class="label">Thinking</span>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <strong style="color:#ff6b8a">Akureyri red</strong> ripple lattice —
+    part of <a href="../../">Motion Lab</a>.<br />
+    Math inspired by
+    <a href="https://lovethinking.vercel.app/" rel="noopener">Rocorgi · lovethinking</a>
+    · heart traffic lights of Akureyri.<br />
+    Assets: <code>export/ripple-heart-thinking-red.gif</code> · <code>.mp4</code>
+  </footer>
+  <script src="lib/ripple-heart.js"></script>
+  <script>
+    window.__rippleHearts = Array.from(document.querySelectorAll("[data-heart]")).map((canvas) =>
+      RippleDotHeart.mount(canvas, {
+        dotColor: "#FF3366",
+        duration: 1200,
+        interval: 0,
+        cssWidth: 28,
+        cssHeight: 24,
+      })
+    );
+    /** Deterministic seek for GIF/MP4 export (progress 0..1). */
+    window.__seekRipple = function (progress) {
+      window.__rippleHearts.forEach((h) => h.drawProgress(progress));
+    };
+  </script>
+</body>
+</html>

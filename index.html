@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Motion Lab — open UI motion demos</title>
+  <meta name="description" content="A small open collection of reusable UI motion demos. First drop: Akureyri red ripple heart." />
+  <style>
+    :root {
+      --bg: #0d0a12;
+      --fg: #e8e4ec;
+      --muted: rgba(232,228,236,0.55);
+      --red: #FF3366;
+      --card: #1a1520;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, #3a2040 0%, transparent 55%),
+        var(--bg);
+      color: var(--fg);
+      padding: 48px 24px 80px;
+    }
+    main { max-width: 720px; margin: 0 auto; }
+    h1 {
+      font-size: 28px;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 32px;
+      max-width: 52ch;
+    }
+    .lede a { color: #ff6b8a; }
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 22px 22px 20px;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .card:hover {
+      border-color: rgba(255,51,102,0.45);
+      transform: translateY(-1px);
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    footer a { color: #ff6b8a; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Motion Lab</h1>
+    <p class="lede">
+      Open collection of small, reusable UI motions we want to keep and reuse.
+      Web + Swift mirrors where useful. Not a design system — a lab shelf.
+    </p>
+    <a class="card" href="demos/akureyri-ripple-heart/">
+      <span class="tag">Demo 01</span>
+      <h2>Akureyri Ripple Heart</h2>
+      <p>
+        27-dot lattice + ripple phase · signature red <code>#FF3366</code> ·
+        Light/Dark “Thinking” share card · SwiftUI mirror included.
+      </p>
+    </a>
+    <footer>
+      Inspired in part by
+      <a href="https://lovethinking.vercel.app/" rel="noopener">Rocorgi · lovethinking</a>.
+      Source on GitHub once linked from the repo README.
+    </footer>
+  </main>
+</body>
+</html>

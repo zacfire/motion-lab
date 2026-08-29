@@ -1,0 +1,11 @@
+{
+  "name": "akureyri-ripple-heart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "node scripts/export-media.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

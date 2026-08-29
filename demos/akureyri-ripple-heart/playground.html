@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roseau · Dot Matrix Heartbeat Proto</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(255, 255, 255, 0.06);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.55);
+      --roseau: #3b82f6;
+      --pulse: #ff3366;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.22), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(255, 51, 102, 0.16), transparent 50%),
+        var(--bg);
+      color: var(--text);
+      font-family: "SF Pro Text", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      padding: 28px 20px 48px;
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto 28px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 560;
+      letter-spacing: -0.03em;
+    }
+
+    header p {
+      margin: 0;
+      max-width: 62ch;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    header code {
+      font-size: 12px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      position: relative;
+      min-height: 320px;
+      border-radius: 28px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 28px 20px;
+      box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.04);
+    }
+
+    .card.photo {
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.35)),
+        url("https://rocorgi.oss-ap-northeast-1.aliyuncs.com/os.rocorgi.wang/akurayli.jpeg?x-oss-process=style/Quality")
+          center / cover no-repeat;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .card.light {
+      background: rgba(255, 255, 255, 0.78);
+      color: #111;
+      border-color: rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.75);
+    }
+
+    .card.light .eyebrow,
+    .card.light .caption { color: rgba(0, 0, 0, 0.55); }
+
+    .card.roseau {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(59, 130, 246, 0.18), transparent 55%),
+        rgba(255, 255, 255, 0.92);
+      color: #111827;
+      border-color: rgba(59, 130, 246, 0.18);
+      box-shadow:
+        inset 0 0 50px rgba(255, 255, 255, 0.9),
+        0 18px 50px rgba(15, 23, 42, 0.12);
+    }
+
+    .card.roseau .eyebrow { color: rgba(17, 24, 39, 0.45); }
+    .card.roseau .caption { color: rgba(17, 24, 39, 0.55); }
+
+    .eyebrow {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stage.inline {
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .caption {
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .caption.breathing {
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+
+    .caption.pulsing {
+      animation: pulseLabel 1.2s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.42; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes pulseLabel {
+      0%, 100% { opacity: 0.55; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-1px); }
+    }
+
+    canvas.pixelated {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+
+    .controls {
+      max-width: 1100px;
+      margin: 22px auto 0;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      padding: 16px;
+      border-radius: 22px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    @media (max-width: 900px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] { width: 100%; }
+    input[type="color"] {
+      width: 100%;
+      height: 36px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .note {
+      max-width: 1100px;
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .caption.breathing,
+      .caption.pulsing { animation: none; opacity: 0.85; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Roseau · Akureyri 点阵心跳原型</h1>
+    <p>
+      复刻 <code>lovethinking.vercel.app</code> 的
+      <code>RippleHeartAnimation</code>：27 点心形点阵 + 从中心向外的涟漪缩放/透明度。
+      第四张卡是 Roseau 向的「Thinking / 心跳」候选：蓝点、小尺寸、旁挂文案。
+    </p>
+  </header>
+
+  <div class="grid">
+    <section class="card photo">
+      <div class="eyebrow"><span>Inspired by</span><span>Akureyri</span></div>
+      <div class="stage">
+        <canvas id="heart-pulse" class="pixelated" width="20" height="17" aria-label="Dot matrix heart pulsing"></canvas>
+        <span class="caption pulsing">Pulsing</span>
+      </div>
+    </section>
+
+    <section class="card light">
+      <div class="eyebrow"><span>Light</span><span>Mode</span></div>
+      <div class="stage inline">
+        <canvas id="heart-light" class="pixelated" width="20" height="17" aria-label="Dot matrix heart thinking light"></canvas>
+        <span class="caption breathing">Thinking</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow"><span>Dark</span><span>Mode</span></div>
+      <div class="stage inline">
+        <canvas id="heart-dark" class="pixelated" width="20" height="17" aria-label="Dot matrix heart thinking dark"></canvas>
+        <span class="caption breathing">Thinking</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="grid" style="margin-top: 16px; grid-template-columns: 1fr;">
+    <section class="card roseau" style="min-height: 220px;">
+      <div class="eyebrow"><span>Roseau</span><span>Heartbeat candidate</span></div>
+      <div class="stage inline">
+        <canvas id="heart-roseau" class="pixelated" width="20" height="17" aria-label="Roseau heartbeat candidate"></canvas>
+        <span class="caption breathing" id="roseau-label">芦苇还活着</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="controls">
+    <label>
+      Color
+      <input id="color" type="color" value="#FF3366" />
+    </label>
+    <label>
+      Duration <span id="duration-val">1200ms</span>
+      <input id="duration" type="range" min="600" max="3200" step="100" value="1200" />
+    </label>
+    <label>
+      Size <span id="size-val">28×24</span>
+      <input id="size" type="range" min="16" max="96" step="2" value="28" />
+    </label>
+    <label>
+      Interval <span id="interval-val">0ms</span>
+      <input id="interval" type="range" min="0" max="1200" step="50" value="0" />
+    </label>
+  </div>
+
+  <p class="note">
+    算法与源站一致：固定 20×17 逻辑坐标、27 个圆点、按距中心归一化距离做相位偏移，
+    半径与透明度在半周期内放大再收回。源站开源用法页也鼓励拷贝组件；本原型仅作 Roseau
+    产品研究对照，未并入 App。若 Reduce Motion 开启，文案呼吸停，点阵仍以静态相位绘制（可再改成完全静止）。
+  </p>
+
+  <script>
+    // Heart lattice from RippleHeartAnimation (lovethinking.vercel.app)
+    const HEART_DOTS = [
+      { x: 10.25, y: 15 },
+      { x: 7.25, y: 12 }, { x: 10.25, y: 12 }, { x: 13.25, y: 12 },
+      { x: 4.25, y: 9 }, { x: 7.25, y: 9 }, { x: 10.25, y: 9 }, { x: 13.25, y: 9 }, { x: 16.25, y: 9 },
+      { x: 1.25, y: 6 }, { x: 4.25, y: 6 }, { x: 7.25, y: 6 }, { x: 10.25, y: 6 }, { x: 13.25, y: 6 }, { x: 16.25, y: 6 }, { x: 19.25, y: 6 },
+      { x: 1.25, y: 3 }, { x: 4.25, y: 3 }, { x: 7.25, y: 3 }, { x: 10.25, y: 3 }, { x: 13.25, y: 3 }, { x: 16.25, y: 3 }, { x: 19.25, y: 3 },
+      { x: 4.25, y: 0 }, { x: 7.25, y: 0 }, { x: 13.25, y: 0 }, { x: 16.25, y: 0 },
+    ];
+
+    const CENTER = { x: 10, y: 8.5 };
+    const withDistance = HEART_DOTS.map((dot) => {
+      const dx = dot.x - CENTER.x;
+      const dy = dot.y - CENTER.y;
+      return { ...dot, distance: Math.hypot(dx, dy) };
+    });
+    const maxDistance = Math.max(...withDistance.map((d) => d.distance));
+    const DOTS = withDistance.map((dot) => ({
+      ...dot,
+      normalizedDistance: dot.distance / maxDistance,
+    }));
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function mountRippleHeart(canvas, options) {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return () => {};
+
+      let {
+        dotColor = "#ffffff",
+        duration = 2000,
+        interval = 0,
+        cssWidth = 20,
+        cssHeight = 17,
+      } = options;
+
+      const LOGICAL_W = 20;
+      const LOGICAL_H = 17;
+      let raf = 0;
+      const startedAt = performance.now();
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = LOGICAL_W * dpr;
+        canvas.height = LOGICAL_H * dpr;
+        canvas.style.width = `${cssWidth}px`;
+        canvas.style.height = `${cssHeight}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawFrame(now) {
+        const cycle = duration + interval;
+        const elapsed = (now - startedAt) % cycle;
+        ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+        if (reduceMotion) {
+          // Static mid-ripple snapshot
+          DOTS.forEach((dot) => {
+            ctx.beginPath();
+            ctx.globalAlpha = 0.85;
+            ctx.fillStyle = dotColor;
+            ctx.arc(dot.x, dot.y, 0.85, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          });
+          return;
+        }
+
+        if (elapsed > duration) return;
+
+        const progress = elapsed / duration;
+        DOTS.forEach((dot) => {
+          let phase = (progress - 0.5 * dot.normalizedDistance + 1) % 1;
+          let radius;
+          let alpha;
+          if (phase < 0.5) {
+            radius = 0.5 + 3 * phase;
+            alpha = 2 * phase;
+          } else {
+            radius = 2 - (phase - 0.5) * 3;
+            alpha = 1 - (phase - 0.5) * 2;
+          }
+          ctx.beginPath();
+          ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+          ctx.fillStyle = dotColor;
+          ctx.arc(dot.x, dot.y, 0.5 * radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        });
+      }
+
+      function tick(now) {
+        drawFrame(now);
+        raf = requestAnimationFrame(tick);
+      }
+
+      resize();
+      raf = requestAnimationFrame(tick);
+
+      return {
+        update(next) {
+          dotColor = next.dotColor ?? dotColor;
+          duration = next.duration ?? duration;
+          interval = next.interval ?? interval;
+          cssWidth = next.cssWidth ?? cssWidth;
+          cssHeight = next.cssHeight ?? cssHeight;
+          resize();
+        },
+        destroy() {
+          cancelAnimationFrame(raf);
+        },
+      };
+    }
+
+    // Faithful originals from the source page
+    mountRippleHeart(document.getElementById("heart-pulse"), {
+      dotColor: "#FF3366",
+      duration: 1200,
+      cssWidth: 80,
+      cssHeight: 68,
+    });
+
+    mountRippleHeart(document.getElementById("heart-light"), {
+      dotColor: "#000000",
+      duration: 2000,
+      cssWidth: 20,
+      cssHeight: 17,
+    });
+
+    mountRippleHeart(document.getElementById("heart-dark"), {
+      dotColor: "#FFFFFF",
+      duration: 1000,
+      cssWidth: 20,
+      cssHeight: 17,
+    });
+
+    const roseau = mountRippleHeart(document.getElementById("heart-roseau"), {
+      dotColor: "#FF3366",
+      duration: 1200,
+      cssWidth: 28,
+      cssHeight: 24,
+    });
+
+    const colorEl = document.getElementById("color");
+    const durationEl = document.getElementById("duration");
+    const sizeEl = document.getElementById("size");
+    const intervalEl = document.getElementById("interval");
+    const durationVal = document.getElementById("duration-val");
+    const sizeVal = document.getElementById("size-val");
+    const intervalVal = document.getElementById("interval-val");
+
+    function syncRoseau() {
+      const size = Number(sizeEl.value);
+      const height = Math.round(size * 17 / 20);
+      const duration = Number(durationEl.value);
+      const interval = Number(intervalEl.value);
+      durationVal.textContent = `${duration}ms`;
+      sizeVal.textContent = `${size}×${height}`;
+      intervalVal.textContent = `${interval}ms`;
+      roseau.update({
+        dotColor: colorEl.value,
+        duration,
+        interval,
+        cssWidth: size,
+        cssHeight: height,
+      });
+    }
+
+    colorEl.addEventListener("input", syncRoseau);
+    durationEl.addEventListener("input", syncRoseau);
+    sizeEl.addEventListener("input", syncRoseau);
+    intervalEl.addEventListener("input", syncRoseau);
+  </script>
+</body>
+</html>
